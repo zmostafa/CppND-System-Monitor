@@ -17,6 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "constants.h"
+#include "util.h" // include util.h for getStream()
 
 
 using namespace std;
@@ -44,3 +45,15 @@ private:
 };
 
 // TODO: Define all of the above functions below:
+bool ProcessParser::isPidExisting(string pid){
+    try{
+        Util::getStream(Path::basePath(),pid);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+
+    return true;
+}
+string ProcessParser::getCmd(string pid){
+
+}
