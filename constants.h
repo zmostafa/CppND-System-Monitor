@@ -38,4 +38,7 @@ public:
     static string versionPath(){
         return "version";
     }
+    static string osNamePath(){
+        return "version_signature";
+    }
 };
