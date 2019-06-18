@@ -45,6 +45,9 @@ public:
     void setCpuCoresStats();
     std::vector<std::string> getCoresStats()const;
 };
+
+/*This method initializes attributes in SysInfo class. It takes size, or number of cores, and initializes the object. 
+Besides that, this method sets previous data for a specific CPU core.*/
 void SysInfo::getOtherCores(int _size){
 //when number of cores is detected, vectors are modified to fit incoming data
         this->coresStats = std::vector<std::string>();
@@ -57,6 +60,9 @@ void SysInfo::getOtherCores(int _size){
         this->lastCpuCoresStats[i] = ProcessParser::getSysCpuPercent(to_string(i));
     }
 }
+
+/* This method updates and creates new datasets for CPU calculation. 
+Every core is updated and previous data becomes the current data of calculated measures.*/
 void SysInfo::setLastCpuMeasures(){
  this->lastCpuStats = ProcessParser::getSysCpuPercent();
 }
@@ -71,6 +77,8 @@ void SysInfo::setCpuCoresStats(){
     }
     this->lastCpuCoresStats = this->currentCpuCoresStats;
 }
+
+/*This function initializes or refreshes an object.*/
 void SysInfo::setAttributes(){
 // getting parsed data
     this-> memPercent = ProcessParser::getSysRamPercent();
@@ -85,6 +93,7 @@ void SysInfo::setAttributes(){
 
 }
 // Constructing string for every core data display
+/*This method creates a string with a progress bar. The bar shows the current status of aggregate CPU utilization, or the utilization of a selected core.*/
 std::vector<std::string> SysInfo::getCoresStats()const{
     std::vector<std::string> result= std::vector<std::string>();
     for(int i=0;i<this->coresStats.size();i++){
