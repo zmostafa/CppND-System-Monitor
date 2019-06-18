@@ -45,6 +45,8 @@ private:
     static std::string PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2);
     static bool isPidExisting(string pid);
     static int getNumberOfCores();
+    static float get_sys_active_cpu_time(vector<string> values);
+    static float get_sys_idle_cpu_time(vector<string>values);
 };
 
 // TODO: Define all of the above functions below:
@@ -248,10 +250,79 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber){
         std::cout << exp << std::endl;
     }
 
+     while (std::getline(fstream, line)) {
+        if (line.compare(0, name.size(),name) == 0) {
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+            // set of cpu data active and idle times;
+            return values;
+        }
+    }
+    return (vector<string>());
+
 }
 
 float ProcessParser::getSysRamPercent(){
+    std::ifstream fstream;
+    try{
+        Util::getStream(Path::basePath() + Path::memInfoPath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
 
+    string line;
+    string name0 = "MemTotal:";
+    string name1 = "MemFree:";
+    string name2 = "MemAvailable:";
+    string name3 = "Buffers:";
+
+    float totalMem = 0.0;
+    float memFree = 0.0;
+    float memAval = 0.0;
+    float buffers = 0.0;
+
+    while (std::getline(fstream, line))
+    {
+        if(line.compare(0, name0.size(),name0) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            totalMem = stof(values[1]);
+        }
+
+        if(line.compare(0, name1.size(),name0) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            memFree = stof(values[1]);
+        }
+
+        if(line.compare(0, name2.size(),name0) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            memAval = stof(values[1]);
+        }
+
+        if(line.compare(0, name3.size(),name0) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            buffers = stof(values[1]);
+
+            // I do not like this :( 
+            break;
+        }
+    }
+    
+
+
+    return float(100.0 * (1 - (memFree/(memAval-buffers))));
 }
 
 string ProcessParser::getSysKernelVersion(){
@@ -283,18 +354,39 @@ int ProcessParser::getNumberOfRunningProcesses(){
 string ProcessParser::getOSName(){
     std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath() + Path::osNamePath(), fstream);
+        // Util::getStream(Path::basePath() + Path::osNamePath(), fstream);
+        // Reading os name from a different source
+        Util::getStream("/etc/os-release ", fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
 
-    string osName;
-    std::getline(fstream,osName);
+    string name = "PRETTY_NAME";
+    string line;
 
-    return osName;
+    while(std::getline(fstream,line)){
+        if(line.compare(0, name.size(), name) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            return values[1];
+
+        }
+    }
+
+    return "";
 }
 
 std::string ProcessParser::PrintCpuStats(std::vector<std::string> values1, std::vector<std::string>values2){
+    float activeTime = ProcessParser::get_sys_active_cpu_time(values2) - ProcessParser::get_sys_active_cpu_time(values1);
+    float idleTime = ProcessParser::get_sys_idle_cpu_time(values2) - ProcessParser::get_sys_idle_cpu_time(values1);
+    float totalTime = activeTime + idleTime;
+    float result = 100.0 * (activeTime/totalTime);
+
+    std::string time = to_string(result);
+
+    return time;
 
 }
 
@@ -318,4 +410,26 @@ int ProcessParser::getNumberOfCores(){
         }
     }
     return 0;
+}
+
+/* These functions for calculating active and idle time are a direct extension of the system CPU percentage. 
+They sort and categorize a newly created string vector,
+which contains parsed raw data from file. Because most of the data is recorded as time, 
+we are selecting and summing all active and idle time. */
+
+float ProcessParser::get_sys_active_cpu_time(vector<string> values)
+{
+    return (stof(values[S_USER]) +
+            stof(values[S_NICE]) +
+            stof(values[S_SYSTEM]) +
+            stof(values[S_IRQ]) +
+            stof(values[S_SOFTIRQ]) +
+            stof(values[S_STEAL]) +
+            stof(values[S_GUEST]) +
+            stof(values[S_GUEST_NICE]));
+}
+
+float ProcessParser::get_sys_idle_cpu_time(vector<string>values)
+{
+    return (stof(values[S_IDLE]) + stof(values[S_IOWAIT]));
 }
