@@ -333,10 +333,21 @@ string ProcessParser::getSysKernelVersion(){
         std::cout << exp << std::endl;
     }
 
-    string version;
-    std::getline(fstream,version);
+    string version = "Linux";
+    string line;
 
-    return version;
+    while(std::getline(fstream,line)){
+        if(line.compare(0, version.size(), version) == 0){
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+
+            return values[2];
+
+        }
+    }
+
+    return "";
 }
 
 int ProcessParser::getTotalThreads(){
@@ -356,12 +367,12 @@ string ProcessParser::getOSName(){
     try{
         // Util::getStream(Path::basePath() + Path::osNamePath(), fstream);
         // Reading os name from a different source
-        Util::getStream("/etc/os-release ", fstream);
+        Util::getStream("/etc/os-release", fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
 
-    string name = "PRETTY_NAME";
+    string name = "PRETTY_NAME=";
     string line;
 
     while(std::getline(fstream,line)){
@@ -370,7 +381,7 @@ string ProcessParser::getOSName(){
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
 
-            return values[1];
+            return values[1] + values[2];
 
         }
     }
