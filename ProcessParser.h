@@ -17,6 +17,10 @@
 #include <time.h>
 #include <unistd.h>
 #include "constants.h"
+/* include filesystem header for new directory iterator
+https://stackoverflow.com/questions/45867379/why-does-gcc-not-seem-to-have-the-filesystem-standard-library 
+To link with the library you need to add -lstdc++fs to the command line.*/
+#include <experimental/filesystem>
 
 using namespace std;
 
@@ -68,9 +72,29 @@ string ProcessParser::getCmd(string pid){
     return cmd;
 }
 
-vector<string> ProcessParser::getPidList(){
-    
+// RE-implement this function using the filesystem lib
+vector<string> ProcessParser::getPidList()
+{
+    DIR* dir;
+    // Basically, we are scanning /proc dir for all directories with numbers as their names
+    // If we get valid check we store dir names in vector as list of machine pids
+    vector<string> container;
+    if(!(dir = opendir("/proc")))
+        throw std::runtime_error(std::strerror(errno));
 
+    while (dirent* dirp = readdir(dir)) {
+        // is this a directory?
+        if(dirp->d_type != DT_DIR)
+            continue;
+        // Is every character of the name a digit?
+        if (all_of(dirp->d_name, dirp->d_name + std::strlen(dirp->d_name), [](char c){ return std::isdigit(c); })) {
+            container.push_back(dirp->d_name);
+        }
+    }
+    //Validating process of directory closing
+    if(closedir(dir))
+        throw std::runtime_error(std::strerror(errno));
+    return container;
 }
 
 std::string ProcessParser::getVmSize(string pid){
@@ -267,5 +291,23 @@ std::string ProcessParser::PrintCpuStats(std::vector<std::string> values1, std::
 }
 
 int ProcessParser::getNumberOfCores(){
+    string line;
+    string name = "cpu cores";
+
+    std::ifstream fstream(Path::basePath() + "cpuinfo");
+    try{
+        Util::getStream(Path::basePath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
     
+    while (std::getline(fstream, line)) {
+        if (line.compare(0, name.size(),name) == 0) {
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+            return stoi(values[3]);
+        }
+    }
+    return 0;
 }
