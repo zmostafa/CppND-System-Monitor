@@ -174,6 +174,43 @@ std::string ProcessParser::getProcUpTime(string pid){
 }
     
 string ProcessParser::getProcUser(string pid){
+    string line;
+    string name = "Uid:";
+    string result = "";
+
+    std::ifstream fstream(Path::basePath() + pid + Path::statusPath());
+    try{
+        Util::getStream(Path::basePath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+
+    // reading Uid line from status file
+    while (std::getline(fstream, line)) {
+        if (line.compare(0, name.size(),name) == 0) {
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+            result =  values[1];
+            break;
+        }
+    }
+
+    // Finding equivilant user to Uid in /etc/passwd file
+    try{
+        Util::getStream("/etc/passwd", fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+
+    // Searching for name of the user with selected UID
+    while (std::getline(fstream, line)) {
+        if (line.find(name) != std::string::npos) {
+            result = line.substr(0, line.find(":"));
+            return result;
+        }
+    }
+    return "";
 
 }
 
