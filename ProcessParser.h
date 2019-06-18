@@ -351,14 +351,76 @@ string ProcessParser::getSysKernelVersion(){
 }
 
 int ProcessParser::getTotalThreads(){
+    string line;
+    int result = 0;
+    string name = "Threads:";
+    vector<string> _list = ProcessParser::getPidList();
+    for (int i=0 ; i<_list.size();i++) {
+        string pid = _list[i];
+        //getting every process and reading their number of their threads
+        std::ifstream fstream ;
+        try{
+            Util::getStream(Path::basePath() + pid + Path::statusPath(), fstream);
+        } catch (std::string &exp) {
+            std::cout << exp << std::endl;
+        }
+        while (std::getline(fstream, line)) {
+            if (line.compare(0, name.size(), name) == 0) {
+                istringstream buf(line);
+                istream_iterator<string> beg(buf), end;
+                vector<string> values(beg, end);
+                result += stoi(values[1]);
+                break;
+            }
+        }
+    }
+    return result;
 
 }
 
 int ProcessParser::getTotalNumberOfProcesses(){
+    string line;
+    int result = 0;
+    string name = "processes";
+    ifstream fstream ;
+    try{
+        Util::getStream(Path::basePath() + Path::statPath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+    while (std::getline(fstream, line)) {
+        if (line.compare(0, name.size(), name) == 0) {
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+            result += stoi(values[1]);
+            break;
+        }
+    }
+    return result;
 
 }
     
 int ProcessParser::getNumberOfRunningProcesses(){
+    string line;
+    int result = 0;
+    string name = "procs_running";
+    ifstream fstream ;
+    try{
+        Util::getStream(Path::basePath() + Path::statPath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+    while (std::getline(fstream, line)) {
+        if (line.compare(0, name.size(), name) == 0) {
+            istringstream buf(line);
+            istream_iterator<string> beg(buf), end;
+            vector<string> values(beg, end);
+            result += stoi(values[1]);
+            break;
+        }
+    }
+    return result;
 
 }
 
@@ -377,12 +439,16 @@ string ProcessParser::getOSName(){
 
     while(std::getline(fstream,line)){
         if(line.compare(0, name.size(), name) == 0){
-            istringstream buf(line);
-            istream_iterator<string> beg(buf), end;
-            vector<string> values(beg, end);
+            // istringstream buf(line);
+            // istream_iterator<string> beg(buf), end;
+            // vector<string> values(beg, end);
 
-            return values[1] + values[2];
-
+            // return values[1] + values[2];
+            std::size_t found = line.find("=");
+            found++;
+            string result = line.substr(found);
+            result.erase(std::remove(result.begin(), result.end(), '"'), result.end());
+            return result;
         }
     }
 
