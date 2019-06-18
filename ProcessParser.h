@@ -49,9 +49,9 @@ private:
 
 // TODO: Define all of the above functions below:
 bool ProcessParser::isPidExisting(string pid){
-    std::ifstream fstream(Path::basePath() + pid);
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid, fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -59,9 +59,9 @@ bool ProcessParser::isPidExisting(string pid){
     return true;
 }
 string ProcessParser::getCmd(string pid){
-    std::ifstream fstream(Path::basePath() + pid + Path::cmdPath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid + Path::cmdPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -98,13 +98,13 @@ vector<string> ProcessParser::getPidList()
 }
 
 std::string ProcessParser::getVmSize(string pid){
-    std::ifstream fstream(Path::basePath() + pid + Path::statusPath());
+    std::ifstream fstream;
     float result;
     string line;
     string inputString = "VmData";
 
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid + Path::statusPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -127,9 +127,9 @@ std::string ProcessParser::getVmSize(string pid){
 }
 
 std::string ProcessParser::getCpuPercent(string pid){
-    std::ifstream fstream(Path::basePath() + pid + "/" + Path::statPath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid + "/" + Path::statPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -160,9 +160,9 @@ std::string ProcessParser::getCpuPercent(string pid){
 }
 
 long int ProcessParser::getSysUpTime(){
-    std::ifstream fstream(Path::basePath() + Path::upTimePath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + Path::upTimePath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -177,9 +177,9 @@ long int ProcessParser::getSysUpTime(){
 }
 
 std::string ProcessParser::getProcUpTime(string pid){
-    std::ifstream fstream(Path::basePath() + pid + "/" + Path::statPath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid + "/" + Path::statPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -202,9 +202,9 @@ string ProcessParser::getProcUser(string pid){
     string name = "Uid:";
     string result = "";
 
-    std::ifstream fstream(Path::basePath() + pid + Path::statusPath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + pid + Path::statusPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -239,6 +239,14 @@ string ProcessParser::getProcUser(string pid){
 }
 
 vector<string> ProcessParser::getSysCpuPercent(string coreNumber){
+    string line;
+    string name = "cpu" + coreNumber;
+    std::ifstream fstream;
+    try{
+        Util::getStream(Path::basePath() + Path::statPath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
 
 }
 
@@ -247,9 +255,9 @@ float ProcessParser::getSysRamPercent(){
 }
 
 string ProcessParser::getSysKernelVersion(){
-    std::ifstream fstream(Path::basePath() + Path::versionPath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + Path::versionPath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -273,9 +281,9 @@ int ProcessParser::getNumberOfRunningProcesses(){
 }
 
 string ProcessParser::getOSName(){
-    std::ifstream fstream(Path::basePath() + Path::osNamePath());
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + Path::osNamePath(), fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
@@ -294,9 +302,9 @@ int ProcessParser::getNumberOfCores(){
     string line;
     string name = "cpu cores";
 
-    std::ifstream fstream(Path::basePath() + "cpuinfo");
+    std::ifstream fstream;
     try{
-        Util::getStream(Path::basePath(), fstream);
+        Util::getStream(Path::basePath() + "cpuinfo", fstream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
