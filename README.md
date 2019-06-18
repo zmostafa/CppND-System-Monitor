@@ -17,7 +17,7 @@ sudo apt-get install libncurses5-dev libncursesw5-dev
 ```
 4. Compile and run
 ```
-g++ -std="c++17" main.cpp -lncurses
+g++ -std="c++17" main.cpp -lncurses -lstdc++fs
 ./a.out
 ```
 5. In case of error that looks like the following: 
