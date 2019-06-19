@@ -103,7 +103,7 @@ std::string ProcessParser::getVmSize(string pid){
     std::ifstream fstream;
     float result;
     string line;
-    string inputString = "VmData";
+    string inputString = "VmData:";
 
     try{
         Util::getStream(Path::basePath() + pid + Path::statusPath(), fstream);
@@ -202,7 +202,7 @@ std::string ProcessParser::getProcUpTime(string pid){
 string ProcessParser::getProcUser(string pid){
     string line;
     string name = "Uid:";
-    string result = "";
+    string result;
 
     std::ifstream fstream;
     try{
@@ -223,14 +223,16 @@ string ProcessParser::getProcUser(string pid){
     }
 
     // Finding equivilant user to Uid in /etc/passwd file
+    std::ifstream userStream;
     try{
-        Util::getStream("/etc/passwd", fstream);
+        Util::getStream("/etc/passwd", userStream);
     } catch (std::string &exp) {
         std::cout << exp << std::endl;
     }
 
     // Searching for name of the user with selected UID
-    while (std::getline(fstream, line)) {
+    name =("x:" + result);
+    while (std::getline(userStream, line)) {
         if (line.find(name) != std::string::npos) {
             result = line.substr(0, line.find(":"));
             return result;
@@ -264,13 +266,6 @@ vector<string> ProcessParser::getSysCpuPercent(string coreNumber){
 }
 
 float ProcessParser::getSysRamPercent(){
-    std::ifstream fstream;
-    try{
-        Util::getStream(Path::basePath() + Path::memInfoPath(), fstream);
-    } catch (std::string &exp) {
-        std::cout << exp << std::endl;
-    }
-
     string line;
     string name0 = "MemTotal:";
     string name1 = "MemFree:";
@@ -282,8 +277,17 @@ float ProcessParser::getSysRamPercent(){
     float memAval = 0.0;
     float buffers = 0.0;
 
+    std::ifstream fstream;
+    try{
+        Util::getStream(Path::basePath() + Path::memInfoPath(), fstream);
+    } catch (std::string &exp) {
+        std::cout << exp << std::endl;
+    }
+
     while (std::getline(fstream, line))
     {
+        // if (totalMem != 0 && memFree != 0)
+        //     break;
         if(line.compare(0, name0.size(),name0) == 0){
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
@@ -292,7 +296,7 @@ float ProcessParser::getSysRamPercent(){
             totalMem = stof(values[1]);
         }
 
-        if(line.compare(0, name1.size(),name0) == 0){
+        if(line.compare(0, name1.size(),name1) == 0){
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
@@ -300,7 +304,7 @@ float ProcessParser::getSysRamPercent(){
             memFree = stof(values[1]);
         }
 
-        if(line.compare(0, name2.size(),name0) == 0){
+        if(line.compare(0, name2.size(),name2) == 0){
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
@@ -308,7 +312,7 @@ float ProcessParser::getSysRamPercent(){
             memAval = stof(values[1]);
         }
 
-        if(line.compare(0, name3.size(),name0) == 0){
+        if(line.compare(0, name3.size(),name3) == 0){
             istringstream buf(line);
             istream_iterator<string> beg(buf), end;
             vector<string> values(beg, end);
@@ -316,7 +320,7 @@ float ProcessParser::getSysRamPercent(){
             buffers = stof(values[1]);
 
             // I do not like this :( 
-            break;
+            //break;
         }
     }
     

@@ -67,7 +67,7 @@ void printMain(SysInfo sys,ProcessContainer procs){
     int yMax,xMax;
     getmaxyx(stdscr,yMax,xMax); // getting size of window measured in lines and columns(column one char length)
 	WINDOW *sys_win = newwin(17,xMax-1,0,0);
-	WINDOW *proc_win = newwin(15,xMax-1,18,0);
+	WINDOW *proc_win = newwin(25,xMax-1,18,0);
 
 
     init_pair(1,COLOR_BLUE,COLOR_BLACK);
